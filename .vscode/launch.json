@@ -1,0 +1,66 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'pnawir'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=pnawir"
+                ],
+                "filter": {
+                    "name": "pnawir",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug executable 'pnawir'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=pnawir",
+                    "--package=pnawir"
+                ],
+                "filter": {
+                    "name": "pnawir",
+                    "kind": "bin"
+                }
+            },
+            "args": [
+                "-f /Users/nick/dev/pnawir/examples/ba2022/P002.pnawir"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in executable 'pnawir'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--bin=pnawir",
+                    "--package=pnawir"
+                ],
+                "filter": {
+                    "name": "pnawir",
+                    "kind": "bin"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
