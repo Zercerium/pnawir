@@ -85,6 +85,7 @@ pub fn build_sync_reachability_graph(net: &ModularPetrinet) -> Graph {
                             let c_segment = &graph.segment_storage[m_id].0
                                 [c_sync_marking.segment_ids[m_id] as usize]
                                 .0;
+
                             let marking = &c_segment.markings
                                 [(t.1 - c_segment.marking_offset) as usize]
                                 .marking;
@@ -147,20 +148,47 @@ pub fn build_sync_reachability_graph(net: &ModularPetrinet) -> Graph {
                     new_sync_marking.segment_ids[m_id] = c_sync_marking.segment_ids[m_id];
                 }
             }
-            // links segments (edges)
-            edges.push(SyncEdge {
-                transition_id: *e_t_id,
-                sync_marking_id: (graph.sync_graph.len() as u32),
-            });
 
-            to_explore.push((graph.sync_graph.len(), e_t_o2));
-            let sync_g = &mut graph.sync_graph;
-            sync_g.push(new_sync_marking);
+            // same sync_node
+            if new_sync_marking == *c_sync_marking {
+                // links segments (edges)
+                edges.push(SyncEdge {
+                    transition_id: *e_t_id,
+                    sync_marking_id: now_exploring.0 as u32,
+                });
+                // recreate seg -> seg edges
+
+                for m_id in 0..net_count {
+                    let old = graph.segment_storage[m_id].0
+                        [c_sync_marking.segment_ids[m_id] as usize]
+                        .1
+                        .pop()
+                        .unwrap();
+
+                    graph.segment_storage[m_id].0[c_sync_marking.segment_ids[m_id] as usize]
+                        .1
+                        .push((*e_t_id, vec![]));
+
+                    // TODO search for marking_id
+                }
+            } else {
+                // links segments (edges)
+                edges.push(SyncEdge {
+                    transition_id: *e_t_id,
+                    sync_marking_id: (graph.sync_graph.len() as u32),
+                });
+                to_explore.push((graph.sync_graph.len(), e_t_o2));
+                let sync_g = &mut graph.sync_graph;
+                sync_g.push(new_sync_marking);
+            }
         }
         let sync_g = &mut graph.sync_graph;
         sync_g[now_exploring.0].edges = edges;
+
+        // graph.print(net);
     }
 
+    dbg!(&graph);
     graph
 }
 
@@ -199,7 +227,9 @@ fn find_all_e_t(
             //         }
             //     }
             // }
-            result.push((t.0, t.1.into_iter().collect::<Vec<_>>()));
+            let mut res = t.1.into_iter().collect::<Vec<_>>();
+            res.sort();
+            result.push((t.0, res));
         }
     }
 

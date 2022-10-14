@@ -7,6 +7,7 @@ type Count = u32;
 pub type MarkingId = Id;
 pub type SegmentId = Id;
 
+#[derive(Debug)]
 pub struct Graph {
     pub sync_graph: Vec<SyncMarking>,
     pub segment_storage: Vec<(
@@ -16,6 +17,10 @@ pub struct Graph {
 }
 
 impl Graph {
+    pub fn contains_sync_node(&self, sm_b: SyncMarking) -> Option<usize> {
+        self.sync_graph.iter().position(|sm_a| sm_a == &sm_b)
+    }
+
     pub fn contains_segment(&self, segment: &Segment, m_id: ModuleId) -> Option<SegmentId> {
         let segs = &self.segment_storage[m_id as usize].0;
         let segment_sort = segment.sort_marking();
@@ -74,10 +79,22 @@ impl Graph {
     }
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, Clone)]
 pub struct SyncMarking {
     pub segment_ids: Vec<Id>,
     pub edges: Vec<SyncEdge>,
+}
+
+impl PartialEq for SyncMarking {
+    fn eq(&self, other: &Self) -> bool {
+        assert_eq!(self.segment_ids.len(), other.segment_ids.len());
+        for (a, b) in self.segment_ids.iter().zip(other.segment_ids.iter()) {
+            if a != b {
+                return false;
+            }
+        }
+        true
+    }
 }
 
 #[derive(Debug, PartialEq, Clone, Copy)]
